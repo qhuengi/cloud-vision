@@ -1,8 +1,9 @@
 import cv2 as cv
 import numpy as np
-
-imReference = cv.imread(r'D:\Users\me\Downloads\panelright.jpg')
-im = cv.imread(r'D:\Users\me\Downloads\panelleft.jpg')
+refFilename = r'D:\Users\me\Downloads\panelright.jpg'
+imFilename = r'D:\Users\me\Downloads\panelleft.jpg'
+imReference = cv.imread(refFilename)
+im = cv.imread(imFilename)
 pointsReference = np.array([[650,1748],
                             [248,1469],
                             [491,1388],
