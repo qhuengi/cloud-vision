@@ -1,13 +1,10 @@
 import cv2 as cv
 import numpy as np
 
-
-def brMap(image, threshold=0.25):
-    """Maps each pixel to its normalized blue/red ratio (see Li et al., 2011).
-
-    Keyword arguments:
-    threshold -- threshold value for ratio, between 0 and 1, default 0.25.
-    """
+def brMap(image):
+    '''
+    Maps each pixel of image to its normalized blue/red ratio (see Li et al., 2011).
+    '''
     mapped=np.empty(image.shape[0:2])
     for i in range(0,image.shape[0]):
         for j in range(0,image.shape[1]):
