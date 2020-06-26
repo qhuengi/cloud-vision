@@ -14,6 +14,7 @@ indices = filter(lambda x: hier[0][x][3] < 0, range(len(hier[0])))
 contoursFiltered = list(map(lambda x: contours[x],indices))
 imFiltered = copy.deepcopy(cloud)
 cv.drawContours(imFiltered, contoursFiltered, -1, (0,0,255),2)
+# finds bounding rectangles of filtered contours
 boundRects = list(map(lambda x: cv.boundingRect(x),contoursFiltered))
 for rect in boundRects:
     cv.rectangle(cloud,(rect[0],rect[1]),(rect[0]+rect[2],rect[1]+rect[3]),(0,255,0),2)
