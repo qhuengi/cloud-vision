@@ -50,7 +50,7 @@ class RegionOffsets:
                 refCorner = (x * self.__regionSize[1], y * self.__regionSize[0])
                 offsetCorner = tuple(np.array(self.offsets[y][x][::-1],dtype='int32'))
                 # arbitrary unique color for each region
-                color = (40*x,100,40*y)
+                color = tuple(self.matchiness[y][x]*[255,255,255])
                 cv.circle(imOffsets, refCorner, 15, color, -1)
                 cv.circle(imOffsets, offsetCorner, 15, color, -1)
                 cv.line(imOffsets, refCorner, offsetCorner, color, 3)
