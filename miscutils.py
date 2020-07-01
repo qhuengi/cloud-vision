@@ -1,6 +1,6 @@
 import cv2 as cv
 import numpy as np
-
+import matplotlib.pyplot as plt
 def brMap(image):
     '''
     Maps each pixel of image to its normalized blue/red ratio (see Li et al., 2011).
@@ -27,14 +27,17 @@ def hytaThreshold(mapped, sdthresh = 0.03, fixedThresh = 0.25, method=cv.THRESH_
 
     mean, stddev = cv.meanStdDev(mapped)
     if stddev < sdthresh:
+        print("unimodal")
         return cv.threshold(mapped, brThresh,255, method)[1]
     else:
+        print("Bimodal")
         # normalizes image from 0-1 to 0-255 because otsu threshold doesn't like        decimals for some reason
         mapped = np.array(mapped * 255, dtype='uint8')
         blur = cv.GaussianBlur(mapped,(5,5),0)
         return cv.threshold(blur, 0,255,method+cv.THRESH_OTSU)[1]
 
 def colorGraph(im1, im2, rowNum):
+    print(rowNum)
     '''Graphs intensities of each color channel of two images at given row.'''
     cols=im1.shape[1]
     (blue1, green1, red1) = im1[rowNum,:].T
@@ -134,27 +137,25 @@ def flatten(l, ltypes=(list, tuple)):
         i += 1
     return ltype(l)
 
-def filterRect(img, rect,threshold=.4):
-    print(rect)
+def filterRect(img, rect,threshold=.3):
     (x,y,w,h)=rect
     mask = np.zeros(img.shape,dtype='uint8')
     cv.rectangle(mask, (x,y),(x+w,y+h), 255, cv.FILLED)
     mean,stddev = cv.meanStdDev(img,mask=mask)
     return mean < threshold
 
-def split(img, rect, sdthreshold = 0.13,sizethreshold = 1000):
+def split(img, rect, sdthreshold = 0.13,sizethreshold = 5000):
     '''Recursively splits bounding rectangle into homogenous rects.
 
     Keyword arguments
     sdthreshold -- max standard deviation of rectangle before being split. (default 0.13).
-    sizethreshold -- min size of rectangle (default 1000).
+    sizethreshold -- min size of rectangle (default 3000).
     '''
     
     mask = np.zeros(img.shape,dtype='uint8')
     (x,y,w,h) = rect
     cv.rectangle(mask,(x,y),(x+w,y+h), 255, cv.FILLED)
     mean,stddev = cv.meanStdDev(img,mask=mask)
-    print(stddev)
     if stddev[0][0] < sdthreshold or w*h < sizethreshold:
         return [rect]
     rects = []
