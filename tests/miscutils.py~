@@ -10,7 +10,7 @@ def brMap(image):
             pixel[2]=1
         brRatio=pixel[0]/pixel[2]
         return (brRatio-1)/(brRatio+1)
-    mapped = np.array([list(map(pixelMap, col)) for col in image],dtype='float32')
+    mapped = np.array([list(map(pixelMap, col)) for col in image]),dtype='float32')
     return mapped
 
 def hytaThreshold(mapped, sdthresh = 0.03, fixedThresh = 0.25, method=cv.THRESH_BINARY_INV):
@@ -134,22 +134,21 @@ def flatten(l, ltypes=(list, tuple)):
         i += 1
     return ltype(l)
 
+def filterRect(img, rect,threshold=.3):
+    (x,y,w,h)=rect
+    mask = np.zeros(img.shape,dtype='uint8')
+    cv.rectangle(mask, (x,y),(x+w,y+h), 255, cv.FILLED)
+    mean,stddev = cv.meanStdDev(img,mask=mask)
+    return mean < threshold
 
-def split(img, rect, sdthreshold = 0.13,sizethreshold = 5000,brThresh = 0.3):
-    '''Recursively splits bounding rectangle into homogenous rects, and filters non-cloud rects.
+def split(img, rect, sdthreshold = 0.13,sizethreshold = 5000):
+    '''Recursively splits bounding rectangle into homogenous rects.
 
     Keyword arguments
     sdthreshold -- max standard deviation of rectangle before being split. (default 0.13).
     sizethreshold -- min size of rectangle (default 3000).
-    brThresh -- max average intensity of pixels in rectangle, i.e. if avg intensity is greater, rect will be filtered (default 0.3).
     '''
     
-    def filterRect(rect):
-        (x,y,w,h)=rect
-        mask = np.zeros(img.shape,dtype='uint8')
-        cv.rectangle(mask, (x,y),(x+w,y+h), 255, cv.FILLED)
-        mean,stddev = cv.meanStdDev(img,mask=mask)
-        return mean < brThresh
     mask = np.zeros(img.shape,dtype='uint8')
     (x,y,w,h) = rect
     cv.rectangle(mask,(x,y),(x+w,y+h), 255, cv.FILLED)
@@ -162,6 +161,4 @@ def split(img, rect, sdthreshold = 0.13,sizethreshold = 5000,brThresh = 0.3):
             left = int(x + i*w/2)
             top = int(y + j*h/2)
             rects.append(split(img, (left,top,int(w/2),int(h/2))))
-    flattened = flatten(rects,list)
-    return list(filter(filterRect, flattened))
-
+    return flatten(rects,list)
