@@ -26,7 +26,7 @@ def hytaThreshold(mapped, sdthresh = 0.03, fixedThresh = 0.25, method=cv.THRESH_
     mean, stddev = cv.meanStdDev(mapped)
     if stddev < sdthresh:
         print("unimodal")
-        return cv.threshold(mapped, brThresh,255, method)[1]
+        return cv.threshold(mapped, fixedThresh,255, method)[1]
     else:
         print("Bimodal")
         # normalizes image from 0-1 to 0-255 because otsu threshold doesn't like        decimals for some reason
