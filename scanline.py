@@ -34,5 +34,4 @@ for i in range(length, scanline1.shape[0]+1, length):
     plt.plot(range(0,scanline1.shape[0]), scanline1Offset, linewidth=1, label='Left')
     plt.plot(range(0,scanline1.shape[0]), scanline2, linewidth=1, label='Right')
     plt.legend()
-
-plt.show()
+    plt.show()
