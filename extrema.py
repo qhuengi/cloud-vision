@@ -5,12 +5,12 @@ import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
 rowNum = 300
-SEGMENT_WIDTH = 20
+SEGMENT_WIDTH = 30
 MIN_DIFF = 40
-SEARCH_BUFFER = 30
+SEARCH_BUFFER = 10
 
-im1 = cv.imread(r'C:\Users\ktsun\AppData\Local\Programs\Python\Python38-32\stuff\a1.jpg')
-im2 = cv.imread(r'C:\Users\ktsun\AppData\Local\Programs\Python\Python38-32\stuff\a2.jpg')
+im1 = cv.imread(r'C:\Users\ktsun\AppData\Local\Programs\Python\Python38-32\stuff\a.png')
+im2 = cv.imread(r'C:\Users\ktsun\AppData\Local\Programs\Python\Python38-32\stuff\b.png')
 
 miscutils.colorGraph(im1, im2, rowNum)
 
@@ -41,6 +41,7 @@ for i in range(0, scanline1.shape[0] + 1 - SEGMENT_WIDTH):
     
         minPos2 = blues2.index(min(blues2))+ i - SEARCH_BUFFER
         maxPos2 = blues2.index(max(blues2))+ i - SEARCH_BUFFER
+        #something is bugged here that makes the graphs look wrong
 
         if (minPos2 - minPos,maxPos2 - maxPos) in diffs:
             continue
@@ -56,9 +57,7 @@ for i in range(0, scanline1.shape[0] + 1 - SEGMENT_WIDTH):
         plt.title("Matched min and max: " + str(i), fontdict=None, loc='center')
         plt.plot(range(0,scanline1.shape[0]), scanline1, linewidth=1, label='Left')
         plt.plot(range(0,scanline1.shape[0]), scanline2, linewidth=1, label='Right')
-        plt.plot([minPos,min(blues)],[minPos2,min(blues2)])
-        plt.plot([maxPos,max(blues)],[maxPos2,max(blues2)])
+        plt.plot([minPos,minPos2],[min(blues),min(blues2)],linewidth=2)
+        plt.plot([maxPos,maxPos2],[max(blues),max(blues2)],linewidth=2)
         plt.legend()
         plt.show()
-
-        #this is a failure
