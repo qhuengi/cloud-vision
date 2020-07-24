@@ -35,28 +35,27 @@ for i in range(0, scanline1.shape[0] - SEGMENT_WIDTH):
         blues.append(segment[j][0])
     minBlue = min(blues)
     maxBlue = max(blues)
-
-    ###
+    '''
     #min cannot be at the edges of segment; only at the "tip" of a curve
- #   if (blues.index(minBlue) == 0 or blues.index(minBlue) + 1 == len(blues)):
-  #      mins = []
-   #     prev = blues[0]
-    #    for i in range(1,len(blues) - 1):
-     #       blue = blues[i]
-      #      if blue > prev:
-       #         mins.append(prev)
- #           prev = blue
-  #      minBlue = min(mins)
-   # if (blues.index(maxBlue) == 0 or blues.index(maxBlue) + 1 == len(blues)):
-    #    maxs = []
-     #   prev = blues[0]
-      #  for i in range(1,len(blues) - 1):
-       #     blue = blues[i]
- #           if blue < prev:
-  #              maxs.append(prev)
-   #         prev = blue
-    #    maxBlue = max(maxs)
-    ###
+    if (blues.index(minBlue) == 0 or blues.index(minBlue) + 1 == len(blues)):
+        mins = []
+        prev = blues[0]
+        for i in range(1,len(blues)):
+            blue = blues[i]
+            if blue > prev:
+                mins.append(prev)
+            prev = blue
+        minBlue = min(mins)
+    if (blues.index(maxBlue) == 0 or blues.index(maxBlue) + 1 == len(blues)):
+        maxs = []
+        prev = blues[0]
+        for i in range(1,len(blues)):
+            blue = blues[i]
+            if blue < prev:
+                maxs.append(prev)
+            prev = blue
+        maxBlue = max(maxs)
+    '''
         
     diff = maxBlue - minBlue
     if diff >= MIN_DIFF:            
@@ -71,26 +70,26 @@ for i in range(0, scanline1.shape[0] - SEGMENT_WIDTH):
         minBlue2 = min(blues2)
         maxBlue2 = max(blues2)
         
-        ###
-        #if (blues2.index(minBlue2) == 0 or blues2.index(minBlue2) + 1 == len(blues2)):
-        #    mins = []
-         #   prev = blues2[0]
-          #  for i in range(1,len(blues2) - 1):
-           #     blue = blues2[i]
-  #              if blue > prev:
-   #                 mins.append(prev)
-    #            prev = blue
-     #       minBlue2 = min(mins)
-      #  if (blues2.index(maxBlue2) == 0 or blues2.index(maxBlue2) + 1 == len(blues2)):
-       #     maxs = []
-        #    prev = blues2[0]
-         #   for i in range(1,len(blues2) - 1):
-          #      blue = blues2[i]
-           #     if blue < prev:
-            #        maxs.append(prev)
-        #        prev = blue
-         #   maxBlue2 = max(maxs)
-        ###
+        '''
+        if (blues2.index(minBlue2) == 0 or blues2.index(minBlue2) + 1 == len(blues2)):
+            mins = []
+            prev = blues2[0]
+            for i in range(1,len(blues2)):
+                blue = blues2[i]
+                if blue > prev:
+                    mins.append(prev)
+                prev = blue
+            minBlue2 = min(mins)
+        if (blues2.index(maxBlue2) == 0 or blues2.index(maxBlue2) + 1 == len(blues2)):
+            maxs = []
+            prev = blues2[0]
+            for i in range(1,len(blues2)):
+                blue = blues2[i]
+                if blue < prev:
+                    maxs.append(prev)
+                prev = blue
+            maxBlue2 = max(maxs)
+        '''
             
         minPos2 = blues2.index(minBlue2)+ i - SEARCH_BUFFER
         maxPos2 = blues2.index(maxBlue2)+ i - SEARCH_BUFFER
