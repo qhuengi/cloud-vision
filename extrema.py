@@ -1,6 +1,5 @@
 #looks through segments of a scanline, and detects its color "spikes" and matches with the same spikes of the other scanline
 #this is based off of scanline.py, might want to combine into one script later
-
 #still working as intended, but it's still matching wrong spikes. I don't know how to fix that
 
 import miscutils
@@ -102,6 +101,16 @@ for i in range(0, scanline1.shape[0] - SEGMENT_WIDTH):
         plt.plot([maxPos,maxPos2],[maxBlue,maxBlue2],linewidth=2)
         plt.axvline(x=i, linestyle = '--')
         plt.axvline(x=i + SEGMENT_WIDTH, linestyle = '--')
+        
+        plt.figure(i + 1)
+        plt.ylim(0, 255)
+        plt.title("Aligned for min. Offset: " + str(minPos - minPos2), fontdict=None, loc='center')
+        line2 = np.roll(scanline2, (minPos - minPos2)*3) # <-- this is a terrible 'bug', same reason why
+                                                            #right and left appears 3 times in the legend.
+                                                            #*3 fixes it because there're color 3 channels or something
+        plt.plot(range(0,scanline1.shape[0]), scanline1, linewidth=1, label='Left')
+        plt.plot(range(0,scanline1.shape[0]), line2, linewidth=1, label='Right')
+
         plt.legend()
         plt.show()
 plt.figure(0)
