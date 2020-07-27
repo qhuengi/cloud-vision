@@ -1,8 +1,7 @@
 #looks through segments of a scanline, and detects its color "spikes" and matches with the same spikes of the other scanline
 #this is based off of scanline.py, might want to combine into one script later
 
-#CURRENT PROBLEMS: don't want to include 1. connections that are obviously wrong, 2. detecting min/max at non-"tips" of curves. that part is wip.
-#this is all so spaghetti
+#CURRENT PROBLEM: the extremas are matching with the wrong ones... I am not sure how to fix this
 
 import miscutils
 import cv2 as cv
@@ -10,8 +9,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 rowNum = 300
 SEGMENT_WIDTH = 50
-MIN_DIFF = 130
-SEARCH_BUFFER = 5
+MIN_DIFF = 100
+SEARCH_BUFFER = 20
 
 im1 = cv.imread(r'C:\Users\ktsun\AppData\Local\Programs\Python\Python38-32\stuff\a.png') #left image
 im2 = cv.imread(r'C:\Users\ktsun\AppData\Local\Programs\Python\Python38-32\stuff\b.png') #right image
@@ -33,29 +32,18 @@ for i in range(0, scanline1.shape[0] - SEGMENT_WIDTH):
     blues = []
     for j in range(len(segment)):
         blues.append(segment[j][0])
-    minBlue = min(blues)
-    maxBlue = max(blues)
-    '''
-    #min cannot be at the edges of segment; only at the "tip" of a curve
-    if (blues.index(minBlue) == 0 or blues.index(minBlue) + 1 == len(blues)):
-        mins = []
-        prev = blues[0]
-        for i in range(1,len(blues)):
-            blue = blues[i]
-            if blue > prev:
-                mins.append(prev)
-            prev = blue
-        minBlue = min(mins)
-    if (blues.index(maxBlue) == 0 or blues.index(maxBlue) + 1 == len(blues)):
-        maxs = []
-        prev = blues[0]
-        for i in range(1,len(blues)):
-            blue = blues[i]
-            if blue < prev:
-                maxs.append(prev)
-            prev = blue
-        maxBlue = max(maxs)
-    '''
+        
+    mins = []
+    maxs = []
+    for k in range(1,len(blues) - 1):
+        if blues[k] > blues[k - 1] and blues[k] > blues[k + 1]:
+            maxs.append(blues[k])
+        elif blues[k] < blues[k - 1] and blues[k] < blues[k + 1]:
+            mins.append(blues[k])
+    if mins == [] or maxs == []:
+        continue
+    minBlue = min(mins)
+    maxBlue = max(maxs)
         
     diff = maxBlue - minBlue
     if diff >= MIN_DIFF:            
@@ -67,29 +55,18 @@ for i in range(0, scanline1.shape[0] - SEGMENT_WIDTH):
         blues2 = []
         for k in range(len(segment2)):
             blues2.append(segment2[k][0])
-        minBlue2 = min(blues2)
-        maxBlue2 = max(blues2)
-        
-        '''
-        if (blues2.index(minBlue2) == 0 or blues2.index(minBlue2) + 1 == len(blues2)):
-            mins = []
-            prev = blues2[0]
-            for i in range(1,len(blues2)):
-                blue = blues2[i]
-                if blue > prev:
-                    mins.append(prev)
-                prev = blue
-            minBlue2 = min(mins)
-        if (blues2.index(maxBlue2) == 0 or blues2.index(maxBlue2) + 1 == len(blues2)):
-            maxs = []
-            prev = blues2[0]
-            for i in range(1,len(blues2)):
-                blue = blues2[i]
-                if blue < prev:
-                    maxs.append(prev)
-                prev = blue
-            maxBlue2 = max(maxs)
-        '''
+            
+        mins = []
+        maxs = []
+        for l in range(1,len(blues2) - 1):
+            if blues2[l] > blues2[l - 1] and blues2[l] > blues2[l + 1]:
+                maxs.append(blues2[l])
+            elif blues2[l] < blues2[l - 1] and blues2[l] < blues2[l + 1]:
+                mins.append(blues2[l])
+        if mins == [] or maxs == []:
+            continue
+        minBlue2 = min(mins)
+        maxBlue2 = max(maxs)
             
         minPos2 = blues2.index(minBlue2)+ i - SEARCH_BUFFER
         maxPos2 = blues2.index(maxBlue2)+ i - SEARCH_BUFFER
@@ -108,5 +85,7 @@ for i in range(0, scanline1.shape[0] - SEGMENT_WIDTH):
         plt.plot(range(0,scanline1.shape[0]), scanline2, linewidth=1, label='Right')
         plt.plot([minPos,minPos2],[minBlue,minBlue2],linewidth=2)
         plt.plot([maxPos,maxPos2],[maxBlue,maxBlue2],linewidth=2)
+        plt.axvline(x=i, linestyle = '--')
+        plt.axvline(x=i + SEGMENT_WIDTH, linestyle = '--')
         plt.legend()
         plt.show()
