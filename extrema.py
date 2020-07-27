@@ -27,6 +27,8 @@ scanline2 = im2[rowNum]
 
 prevX = 0
 prevY = 0
+pos = []
+minOffsets = []
 for i in range(0, scanline1.shape[0] - SEGMENT_WIDTH):
     #probably want to turn this chunk (and others) into function
     segment = scanline1[i:i + SEGMENT_WIDTH]
@@ -85,7 +87,8 @@ for i in range(0, scanline1.shape[0] - SEGMENT_WIDTH):
 
         if (minPos2 - minPos) == prevX or (maxBlue2 - maxBlue) == prevY:
             continue
-
+        pos.append(i)
+        minOffsets.append(minPos2 - minPos)
         print("(" + str(minPos2 - minPos) + "," + str(maxPos2 - maxPos) + ")")
         prevX = minPos2 - minPos
         prevY = maxBlue2 - maxBlue
@@ -101,3 +104,7 @@ for i in range(0, scanline1.shape[0] - SEGMENT_WIDTH):
         plt.axvline(x=i + SEGMENT_WIDTH, linestyle = '--')
         plt.legend()
         plt.show()
+plt.figure(0)
+plt.title("Disparity of scanlines (min)", fontdict=None, loc='center')
+plt.scatter(pos,minOffsets)
+plt.show()
