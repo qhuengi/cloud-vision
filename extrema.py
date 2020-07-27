@@ -1,7 +1,7 @@
 #looks through segments of a scanline, and detects its color "spikes" and matches with the same spikes of the other scanline
 #this is based off of scanline.py, might want to combine into one script later
 
-#CURRENT PROBLEM: the extremas are matching with the wrong ones... I am not sure how to fix this
+#still working as intended, but it's still matching wrong spikes. I don't know how to fix that
 
 import miscutils
 import cv2 as cv
@@ -9,8 +9,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 rowNum = 300
 SEGMENT_WIDTH = 50
-MIN_DIFF = 100
-SEARCH_BUFFER = 20
+MIN_DIFF = 80
+SEARCH_BUFFER = 40
 
 im1 = cv.imread(r'C:\Users\ktsun\AppData\Local\Programs\Python\Python38-32\stuff\a.png') #left image
 im2 = cv.imread(r'C:\Users\ktsun\AppData\Local\Programs\Python\Python38-32\stuff\b.png') #right image
@@ -28,11 +28,11 @@ scanline2 = im2[rowNum]
 prevX = 0
 prevY = 0
 for i in range(0, scanline1.shape[0] - SEGMENT_WIDTH):
+    #probably want to turn this chunk (and others) into function
     segment = scanline1[i:i + SEGMENT_WIDTH]
     blues = []
     for j in range(len(segment)):
         blues.append(segment[j][0])
-        
     mins = []
     maxs = []
     for k in range(1,len(blues) - 1):
@@ -44,32 +44,44 @@ for i in range(0, scanline1.shape[0] - SEGMENT_WIDTH):
         continue
     minBlue = min(mins)
     maxBlue = max(maxs)
+    #
         
     diff = maxBlue - minBlue
-    if diff >= MIN_DIFF:            
+    if diff >= MIN_DIFF:
         minPos = blues.index(minBlue) + i
         maxPos = blues.index(maxBlue) + i
 
-        #"looking" to left only (the left image is the right skewed graph)
-        segment2 = scanline2[i - SEARCH_BUFFER:max(i + SEGMENT_WIDTH - SEARCH_BUFFER, 0)]
-        blues2 = []
-        for k in range(len(segment2)):
-            blues2.append(segment2[k][0])
-            
+        #"looking" to the left of minPos and maxPos, separately
+        #
+        segment2L = scanline2[minPos - SEARCH_BUFFER:minPos]
+        blues2L = []
+        for k in range(len(segment2L)):
+            blues2L.append(segment2L[k][0])
         mins = []
-        maxs = []
-        for l in range(1,len(blues2) - 1):
-            if blues2[l] > blues2[l - 1] and blues2[l] > blues2[l + 1]:
-                maxs.append(blues2[l])
-            elif blues2[l] < blues2[l - 1] and blues2[l] < blues2[l + 1]:
-                mins.append(blues2[l])
-        if mins == [] or maxs == []:
+        for l in range(1,len(blues2L) - 1):
+            if blues2L[l] < blues2L[l - 1] and blues2L[l] < blues2L[l + 1]:
+                mins.append(blues2L[l])
+        if mins == []:
             continue
         minBlue2 = min(mins)
+        #
+        
+        #
+        segment2R = scanline2[maxPos - SEARCH_BUFFER:maxPos]
+        blues2R = []
+        for m in range(len(segment2R)):
+            blues2R.append(segment2R[m][0])
+        maxs = []
+        for n in range(1,len(blues2R) - 1):
+            if blues2R[n] > blues2R[n - 1] and blues2R[n] > blues2R[n + 1]:
+                maxs.append(blues2R[n])
+        if maxs == []:
+            continue
         maxBlue2 = max(maxs)
+        #
             
-        minPos2 = blues2.index(minBlue2)+ i - SEARCH_BUFFER
-        maxPos2 = blues2.index(maxBlue2)+ i - SEARCH_BUFFER
+        minPos2 = blues2L.index(minBlue2)+ minPos - SEARCH_BUFFER
+        maxPos2 = blues2R.index(maxBlue2)+ maxPos - SEARCH_BUFFER
 
         if (minPos2 - minPos) == prevX or (maxBlue2 - maxBlue) == prevY:
             continue
