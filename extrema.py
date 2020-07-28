@@ -1,8 +1,6 @@
 #looks through segments of a scanline, and detects its color "spikes" and matches with the same spikes of the other scanline
 #this is based off of scanline.py, might want to combine into one script later
-
-#CURRENT PROBLEMS: don't want to include 1. connections that are obviously wrong, 2. detecting min/max at non-"tips" of curves. that part is wip.
-#this is all so spaghetti
+#still working as intended, but it's still matching wrong spikes. I don't know how to fix that
 
 import miscutils
 import cv2 as cv
@@ -10,8 +8,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 rowNum = 300
 SEGMENT_WIDTH = 50
-MIN_DIFF = 130
-SEARCH_BUFFER = 5
+MIN_DIFF = 80
+SEARCH_BUFFER = 40
 
 im1 = cv.imread(r'C:\Users\ktsun\AppData\Local\Programs\Python\Python38-32\stuff\a.png') #left image
 im2 = cv.imread(r'C:\Users\ktsun\AppData\Local\Programs\Python\Python38-32\stuff\b.png') #right image
@@ -28,76 +26,68 @@ scanline2 = im2[rowNum]
 
 prevX = 0
 prevY = 0
+pos = []
+minOffsets = []
 for i in range(0, scanline1.shape[0] - SEGMENT_WIDTH):
+    #probably want to turn this chunk (and others) into function
     segment = scanline1[i:i + SEGMENT_WIDTH]
     blues = []
     for j in range(len(segment)):
         blues.append(segment[j][0])
-    minBlue = min(blues)
-    maxBlue = max(blues)
-
-    ###
-    #min cannot be at the edges of segment; only at the "tip" of a curve
- #   if (blues.index(minBlue) == 0 or blues.index(minBlue) + 1 == len(blues)):
-  #      mins = []
-   #     prev = blues[0]
-    #    for i in range(1,len(blues) - 1):
-     #       blue = blues[i]
-      #      if blue > prev:
-       #         mins.append(prev)
- #           prev = blue
-  #      minBlue = min(mins)
-   # if (blues.index(maxBlue) == 0 or blues.index(maxBlue) + 1 == len(blues)):
-    #    maxs = []
-     #   prev = blues[0]
-      #  for i in range(1,len(blues) - 1):
-       #     blue = blues[i]
- #           if blue < prev:
-  #              maxs.append(prev)
-   #         prev = blue
-    #    maxBlue = max(maxs)
-    ###
+    mins = []
+    maxs = []
+    for k in range(1,len(blues) - 1):
+        if blues[k] > blues[k - 1] and blues[k] > blues[k + 1]:
+            maxs.append(blues[k])
+        elif blues[k] < blues[k - 1] and blues[k] < blues[k + 1]:
+            mins.append(blues[k])
+    if mins == [] or maxs == []:
+        continue
+    minBlue = min(mins)
+    maxBlue = max(maxs)
+    #
         
     diff = maxBlue - minBlue
-    if diff >= MIN_DIFF:            
+    if diff >= MIN_DIFF:
         minPos = blues.index(minBlue) + i
         maxPos = blues.index(maxBlue) + i
 
-        #"looking" to left only (the left image is the right skewed graph)
-        segment2 = scanline2[i - SEARCH_BUFFER:max(i + SEGMENT_WIDTH - SEARCH_BUFFER, 0)]
-        blues2 = []
-        for k in range(len(segment2)):
-            blues2.append(segment2[k][0])
-        minBlue2 = min(blues2)
-        maxBlue2 = max(blues2)
+        #"looking" to the left of minPos and maxPos, separately
+        #
+        segment2L = scanline2[minPos - SEARCH_BUFFER:minPos]
+        blues2L = []
+        for k in range(len(segment2L)):
+            blues2L.append(segment2L[k][0])
+        mins = []
+        for l in range(1,len(blues2L) - 1):
+            if blues2L[l] < blues2L[l - 1] and blues2L[l] < blues2L[l + 1]:
+                mins.append(blues2L[l])
+        if mins == []:
+            continue
+        minBlue2 = min(mins)
+        #
         
-        ###
-        #if (blues2.index(minBlue2) == 0 or blues2.index(minBlue2) + 1 == len(blues2)):
-        #    mins = []
-         #   prev = blues2[0]
-          #  for i in range(1,len(blues2) - 1):
-           #     blue = blues2[i]
-  #              if blue > prev:
-   #                 mins.append(prev)
-    #            prev = blue
-     #       minBlue2 = min(mins)
-      #  if (blues2.index(maxBlue2) == 0 or blues2.index(maxBlue2) + 1 == len(blues2)):
-       #     maxs = []
-        #    prev = blues2[0]
-         #   for i in range(1,len(blues2) - 1):
-          #      blue = blues2[i]
-           #     if blue < prev:
-            #        maxs.append(prev)
-        #        prev = blue
-         #   maxBlue2 = max(maxs)
-        ###
+        #
+        segment2R = scanline2[maxPos - SEARCH_BUFFER:maxPos]
+        blues2R = []
+        for m in range(len(segment2R)):
+            blues2R.append(segment2R[m][0])
+        maxs = []
+        for n in range(1,len(blues2R) - 1):
+            if blues2R[n] > blues2R[n - 1] and blues2R[n] > blues2R[n + 1]:
+                maxs.append(blues2R[n])
+        if maxs == []:
+            continue
+        maxBlue2 = max(maxs)
+        #
             
-        minPos2 = blues2.index(minBlue2)+ i - SEARCH_BUFFER
-        maxPos2 = blues2.index(maxBlue2)+ i - SEARCH_BUFFER
+        minPos2 = blues2L.index(minBlue2)+ minPos - SEARCH_BUFFER
+        maxPos2 = blues2R.index(maxBlue2)+ maxPos - SEARCH_BUFFER
 
         if (minPos2 - minPos) == prevX or (maxBlue2 - maxBlue) == prevY:
             continue
-
+        pos.append(i)
+        minOffsets.append(minPos2 - minPos)
         print("(" + str(minPos2 - minPos) + "," + str(maxPos2 - maxPos) + ")")
         prevX = minPos2 - minPos
         prevY = maxBlue2 - maxBlue
@@ -109,5 +99,21 @@ for i in range(0, scanline1.shape[0] - SEGMENT_WIDTH):
         plt.plot(range(0,scanline1.shape[0]), scanline2, linewidth=1, label='Right')
         plt.plot([minPos,minPos2],[minBlue,minBlue2],linewidth=2)
         plt.plot([maxPos,maxPos2],[maxBlue,maxBlue2],linewidth=2)
+        plt.axvline(x=i, linestyle = '--')
+        plt.axvline(x=i + SEGMENT_WIDTH, linestyle = '--')
+        
+        plt.figure(i + 1)
+        plt.ylim(0, 255)
+        plt.title("Aligned for min. Offset: " + str(minPos - minPos2), fontdict=None, loc='center')
+        line2 = np.roll(scanline2, (minPos - minPos2)*3) # <-- this is a terrible 'bug', same reason why
+                                                            #right and left appears 3 times in the legend.
+                                                            #*3 fixes it because there're color 3 channels or something
+        plt.plot(range(0,scanline1.shape[0]), scanline1, linewidth=1, label='Left')
+        plt.plot(range(0,scanline1.shape[0]), line2, linewidth=1, label='Right')
+
         plt.legend()
         plt.show()
+plt.figure(0)
+plt.title("Disparity of scanlines (min)", fontdict=None, loc='center')
+plt.scatter(pos,minOffsets)
+plt.show()
