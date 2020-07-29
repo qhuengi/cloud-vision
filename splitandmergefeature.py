@@ -1,10 +1,10 @@
-import brmap
+import miscutils
 import cv2 as cv
 import numpy as np
 import copy
 import matplotlib.pyplot as plt
-cloud=cv.imread(r'C:\Users\ktsun\AppData\Local\Programs\Python\Python38-32\cloud.jpg')
-img=np.array(brmap.brMap(cloud)*255,dtype='uint8')
+cloud=cv.imread(r'C:\Users\ktsun\AppData\Local\Programs\Python\Python38-32\stuff\cloud.jpg')
+img=np.array(miscutils.brMap(cloud)*255,dtype='uint8')
 blur = cv.GaussianBlur(img,(5,5),0)
 ret,th = cv.threshold(blur,0,255,cv.THRESH_BINARY_INV+cv.THRESH_OTSU)
 contours, hier = cv.findContours(th, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
@@ -25,10 +25,10 @@ cv.imshow('filtered',imFiltered)
 
 ##following orb code from opencv docs
 
-img2 = cv.imread(r'C:\Users\ktsun\AppData\Local\Programs\Python\Python38-32\cloud.jpg',cv.IMREAD_GRAYSCALE) # trainImage
+img2 = cv.imread(r'C:\Users\ktsun\AppData\Local\Programs\Python\Python38-32\stuff\cloud.jpg',cv.IMREAD_GRAYSCALE) # trainImage
 for rect in boundRects:
 
-    cloud=cv.imread(r'C:\Users\ktsun\AppData\Local\Programs\Python\Python38-32\cloud.jpg')
+    cloud=cv.imread(r'C:\Users\ktsun\AppData\Local\Programs\Python\Python38-32\stuff\cloud.jpg')
     img1 = cloud[rect[1]:rect[1]+rect[3],rect[0]:rect[0]+rect[2]]
     
     # Initiate ORB detector
