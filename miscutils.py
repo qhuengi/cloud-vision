@@ -1,6 +1,7 @@
 import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
+from skimage import filters
 def brMap(image):
     '''
     Maps each pixel of image to its normalized blue/red ratio (see Li et al., 2011).
@@ -25,13 +26,13 @@ def hytaThreshold(mapped, sdthresh = 0.03, fixedThresh = 0.25, method=cv.THRESH_
     mean, stddev = cv.meanStdDev(mapped)
     if stddev < sdthresh:
         print("unimodal")
-        return cv.threshold(mapped, brThresh,255, method)[1]
+        return cv.threshold(mapped, fixedThresh,255, method)[1]
     else:
         print("Bimodal")
         # normalizes image from 0-1 to 0-255 because otsu threshold doesn't like        decimals for some reason
         mapped = np.array(mapped * 255, dtype='uint8')
-        blur = cv.GaussianBlur(mapped,(5,5),0)
-        return cv.threshold(blur, 0,255,method+cv.THRESH_OTSU)[1]
+        thresh = filters.threshold_li(mapped)
+        return cv.threshold(mapped, thresh,255,method)[1]
 
 def colorGraph(im1, im2, rowNum):
     print(rowNum)
