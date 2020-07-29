@@ -1,6 +1,6 @@
 #looks through segments of a scanline, and detects its color "spikes" and matches with the same spikes of the other scanline
 #this is based off of scanline.py, might want to combine into one script later
-#still working as intended, but it's still matching wrong spikes. I don't know how to fix that
+#still working as intended, but it's still matching wrong spikes (ex. by taking a min that is not the actual match)
 
 import miscutils
 import cv2 as cv
@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 rowNum = 300
 SEGMENT_WIDTH = 50
 MIN_DIFF = 80
-SEARCH_BUFFER = 40
+SEARCH_BUFFER = 35
 
 im1 = cv.imread(r'C:\Users\ktsun\AppData\Local\Programs\Python\Python38-32\stuff\a.png') #left image
 im2 = cv.imread(r'C:\Users\ktsun\AppData\Local\Programs\Python\Python38-32\stuff\b.png') #right image
@@ -27,7 +27,7 @@ scanline2 = im2[rowNum]
 prevX = 0
 prevY = 0
 pos = []
-minOffsets = []
+minOffsets = np.array([])
 for i in range(0, scanline1.shape[0] - SEGMENT_WIDTH):
     #probably want to turn this chunk (and others) into function
     segment = scanline1[i:i + SEGMENT_WIDTH]
@@ -52,7 +52,6 @@ for i in range(0, scanline1.shape[0] - SEGMENT_WIDTH):
         minPos = blues.index(minBlue) + i
         maxPos = blues.index(maxBlue) + i
 
-        #"looking" to the left of minPos and maxPos, separately
         #
         segment2L = scanline2[minPos - SEARCH_BUFFER:minPos]
         blues2L = []
@@ -86,12 +85,12 @@ for i in range(0, scanline1.shape[0] - SEGMENT_WIDTH):
 
         if (minPos2 - minPos) == prevX or (maxBlue2 - maxBlue) == prevY:
             continue
-        pos.append(i)
-        minOffsets.append(minPos2 - minPos)
+        pos.append(minPos)
+        minOffsets = np.append(minOffsets, minPos - minPos2)
         print("(" + str(minPos2 - minPos) + "," + str(maxPos2 - maxPos) + ")")
         prevX = minPos2 - minPos
         prevY = maxBlue2 - maxBlue
-
+'''
         plt.figure(i)
         plt.ylim(0, 255)
         plt.title("Matched min and max: " + str(i), fontdict=None, loc='center')
@@ -112,8 +111,15 @@ for i in range(0, scanline1.shape[0] - SEGMENT_WIDTH):
         plt.plot(range(0,scanline1.shape[0]), line2, linewidth=1, label='Right')
 
         plt.legend()
-        plt.show()
-plt.figure(0)
-plt.title("Disparity of scanlines (min)", fontdict=None, loc='center')
+        plt.show()''' #uncomment to show offset graphs at each segment
+minOffsets = minOffsets*10 #how much to scale by?
+im = plt.imread(r'C:\Users\ktsun\AppData\Local\Programs\Python\Python38-32\stuff\a.png')
+im = plt.imshow(im)
+plt.xlim(0, im1.shape[1])
+plt.title("Min. offset, left image", fontdict=None, loc='center')
 plt.scatter(pos,minOffsets)
+for i in range(len(pos)):
+    plt.axvline(x=pos[i], linestyle = '--')
+plt.plot([0,im1.shape[1]],[rowNum,rowNum])
 plt.show()
+#how to interpret graph: the further down each point is, the closer the object in the image is. intersection of the lines is a "feature"
