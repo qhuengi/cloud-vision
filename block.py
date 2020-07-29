@@ -2,9 +2,8 @@
 
 import cv2 as cv
 import numpy as np
-import brmap
+import miscutils
 import random
-
 image=cv.imread(r"C:\Users\ktsun\AppData\Local\Programs\Python\Python38-32\cloud.jpg")
 cv.imshow('orig', image)
 
@@ -12,7 +11,7 @@ cv.imshow('orig', image)
 radius = 1
 threshold = 0.25
 
-ret,image = cv.threshold(brmap.brMap(image), threshold, 1, cv.THRESH_BINARY)
+ret,image = cv.threshold(miscutils.brMap(image), threshold, 1, cv.THRESH_BINARY)
 image = np.array(image,dtype='float32')
 image = cv.cvtColor(image,cv.COLOR_GRAY2BGR)
 cv.imshow('thresh', image)
