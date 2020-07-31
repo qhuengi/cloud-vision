@@ -87,7 +87,7 @@ for i in range(0, scanline1.shape[0] - SEGMENT_WIDTH):
             continue
         pos.append(minPos)
         minOffsets = np.append(minOffsets, minPos - minPos2)
-        print("(" + str(minPos2 - minPos) + "," + str(maxPos2 - maxPos) + ")")
+        #print("(" + str(minPos2 - minPos) + "," + str(maxPos2 - maxPos) + ")")
         prevX = minPos2 - minPos
         prevY = maxBlue2 - maxBlue
 '''
@@ -109,9 +109,9 @@ for i in range(0, scanline1.shape[0] - SEGMENT_WIDTH):
                                                             #*3 fixes it because there're color 3 channels or something
         plt.plot(range(0,scanline1.shape[0]), scanline1, linewidth=1, label='Left')
         plt.plot(range(0,scanline1.shape[0]), line2, linewidth=1, label='Right')
-
         plt.legend()
         plt.show()''' #uncomment to show offset graphs at each segment
+print(minOffsets)
 minOffsets = minOffsets*10 #how much to scale by?
 im = plt.imread(r'C:\Users\ktsun\AppData\Local\Programs\Python\Python38-32\stuff\a.png')
 im = plt.imshow(im)
